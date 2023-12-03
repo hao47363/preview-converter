@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Jobs\ConvertPreviewJob;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
@@ -26,11 +27,11 @@ class ConvertPreview extends Command
      */
     public function handle()
     {
-        $macVodData = DB::select('SELECT * FROM mac_vod limit 1');
+        $macVodData = DB::select('SELECT * FROM mac_vod limit 10'); // TODO: update db query
 
         foreach ($macVodData as $macVod) {
             $macVodDownloadLink = $this->extractString($macVod->vod_play_url);
-            $macVodDownloadLink = 'https://video2.verygoodcdn.com/20231129/Ctl6TqiK/index.m3u8';
+            $macVodDownloadLink = 'https://video2.verygoodcdn.com/20231129/Ctl6TqiK/index.m3u8'; // TODO: remove hardcoded url
             if (!empty($macVodDownloadLink)) {
                 $videoFileName = basename($macVodDownloadLink);
                 $vodIdDirectory = public_path('video_m3u8_sources/' . $macVod->vod_id);
@@ -63,7 +64,9 @@ class ConvertPreview extends Command
 
                             $command = './random.sh ' . $newVodIdDirectory . '/preview ' . $newMacVodDownloadLink;
 
-                            exec($command, $output, $returnValue);
+                            // exec($command, $output, $returnValue);
+
+                            dispatch(new ConvertPreviewJob($command));
                         }
                     }
                 }
