@@ -43,25 +43,25 @@ class ConvertPreviewJob implements ShouldQueue
                     ['vod_down_note' => 'Done']
                 );
         } else {
-            // DB::table('mac_vod')
-            //     ->where('vod_id', $this->vodId)
-            //     ->update(
-            //         [
-            //             'vod_down_url' => '',
-            //             'vod_down_note' => 'Failed'
-            //         ]
-            //     );
-
             DB::table('mac_vod')
                 ->where('vod_id', $this->vodId)
                 ->update(
                     [
-                        'vod_down_url' => 'https://asd.uw1wieda.com/preview/' . $this->vodId . '.mp4',
-                        'vod_down_note' => 'Converting'
-                    ],
+                        'vod_down_url' => '',
+                        'vod_down_note' => 'Failed'
+                    ]
                 );
 
-            dispatch(new ConvertPreviewJob($this->command, $this->vodId));
+            // DB::table('mac_vod')
+            //     ->where('vod_id', $this->vodId)
+            //     ->update(
+            //         [
+            //             'vod_down_url' => 'https://asd.uw1wieda.com/preview/' . $this->vodId . '.mp4',
+            //             'vod_down_note' => 'Converting'
+            //         ],
+            //     );
+
+            // dispatch(new ConvertPreviewJob($this->command, $this->vodId));
         }
 
         $folderPath = public_path('preview/' . $this->vodId);
