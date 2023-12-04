@@ -9,6 +9,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
 
 class ConvertPreviewJob implements ShouldQueue
 {
@@ -42,14 +43,31 @@ class ConvertPreviewJob implements ShouldQueue
                     ['vod_down_note' => 'Done']
                 );
         } else {
+            // DB::table('mac_vod')
+            //     ->where('vod_id', $this->vodId)
+            //     ->update(
+            //         [
+            //             'vod_down_url' => '',
+            //             'vod_down_note' => 'Failed'
+            //         ]
+            //     );
+
             DB::table('mac_vod')
                 ->where('vod_id', $this->vodId)
                 ->update(
                     [
-                        'vod_down_url' => '',
-                        'vod_down_note' => 'Failed'
-                    ]
+                        'vod_down_url' => 'https://asd.uw1wieda.com/preview/' . $this->vodId . '.mp4',
+                        'vod_down_note' => 'Converting'
+                    ],
                 );
+
+            dispatch(new ConvertPreviewJob($this->command, $this->vodId));
+        }
+
+        $folderPath = public_path('preview/' . $this->vodId);
+
+        if (File::exists($folderPath)) {
+            File::deleteDirectory($folderPath);
         }
     }
 }
