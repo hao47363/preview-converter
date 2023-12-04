@@ -27,14 +27,13 @@ class ConvertPreview extends Command
      */
     public function handle()
     {
-        $macVodData = DB::select('SELECT * FROM mac_vod limit 10'); // TODO: update db query
+        $macVodData = DB::select('SELECT * FROM mac_vod where vod_down_url = ""');
 
         foreach ($macVodData as $macVod) {
             $macVodDownloadLink = $this->extractString($macVod->vod_play_url);
-            $macVodDownloadLink = 'https://video2.verygoodcdn.com/20231129/Ctl6TqiK/index.m3u8'; // TODO: remove hardcoded url
             if (!empty($macVodDownloadLink)) {
                 $videoFileName = basename($macVodDownloadLink);
-                $vodIdDirectory = public_path('video_m3u8_sources/' . $macVod->vod_id);
+                $vodIdDirectory = public_path('preview/' . $macVod->vod_id);
                 $savePath = $vodIdDirectory . '/' . $videoFileName;
 
                 if (!file_exists($vodIdDirectory)) {
@@ -56,17 +55,24 @@ class ConvertPreview extends Command
                         }
 
                         if (!empty($newMacVodDownloadLink)) {
-                            $newVodIdDirectory = public_path('video_m3u8_sources/' . $macVod->vod_id);
+                            $newVodIdDirectory = __DIR__ . '/../../../../h5-uat.com/preview/' . $macVod->vod_id;
 
                             if (!file_exists($newVodIdDirectory . '/preview')) {
                                 mkdir($newVodIdDirectory . '/preview', 0777, true);
                             }
 
-                            $command = './random.sh ' . $newVodIdDirectory . '/preview ' . $newMacVodDownloadLink;
+                            $command = './random.sh ' . $newVodIdDirectory . ' ' . $newMacVodDownloadLink;
 
-                            // exec($command, $output, $returnValue);
+                            DB::table('mac_vod')
+                                ->where('vod_id', $macVod->vod_id)
+                                ->update(
+                                    [
+                                        'vod_down_url' => 'https://asd.uw1wieda.com/preview/' . $macVod->vod_id . '.mp4',
+                                        'vod_down_note' => 'Converting'
+                                    ],
+                                );
 
-                            dispatch(new ConvertPreviewJob($command));
+                            dispatch(new ConvertPreviewJob($command, $macVod->vod_id));
                         }
                     }
                 }
@@ -76,14 +82,10 @@ class ConvertPreview extends Command
 
     function extractString($inputString)
     {
-        $start = strpos($inputString, '$') + 1;
-        $end = strpos($inputString, '$$$');
-
-        if ($start !== false && $end !== false) {
-            $extractedString = substr($inputString, $start, $end - $start);
-            return $extractedString;
+        $regex = '/https:\/\/.*?\.m3u8/';
+        if (preg_match($regex, $inputString, $matches)) {
+            return $matches[0];
         }
-
         return '';
     }
 }
