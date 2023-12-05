@@ -67,7 +67,6 @@ class ConvertPreview extends Command
                                 ->where('vod_id', $macVod->vod_id)
                                 ->update(
                                     [
-                                        'vod_down_url' => 'https://asd.uw1wieda.com/preview/' . $macVod->vod_id . '.mp4',
                                         'vod_down_note' => 'Converting'
                                     ],
                                 );

@@ -40,14 +40,16 @@ class ConvertPreviewJob implements ShouldQueue
             DB::table('mac_vod')
                 ->where('vod_id', $this->vodId)
                 ->update(
-                    ['vod_down_note' => 'Done']
+                    [
+                        'vod_down_url' => 'https://asd.uw1wieda.com/preview/' . $this->vodId . '.mp4',
+                        'vod_down_note' => 'Done'
+                    ]
                 );
         } else {
             DB::table('mac_vod')
                 ->where('vod_id', $this->vodId)
                 ->update(
                     [
-                        'vod_down_url' => '',
                         'vod_down_note' => 'Failed'
                     ]
                 );
