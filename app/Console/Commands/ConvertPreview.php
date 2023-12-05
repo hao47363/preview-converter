@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Jobs\ConvertPreviewJob;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 
 class ConvertPreview extends Command
 {
@@ -55,7 +56,7 @@ class ConvertPreview extends Command
                         }
 
                         if (!empty($newMacVodDownloadLink)) {
-                            $newVodIdDirectory = __DIR__ . '/../../../../' . config('app.target_domain') . '/preview/' . $macVod->vod_id;
+                            $newVodIdDirectory = __DIR__ . '/../../../../' . config('app.store_preview_video_folder') . '/preview/' . $macVod->vod_id;
 
                             if (!file_exists($newVodIdDirectory . '/preview')) {
                                 mkdir($newVodIdDirectory . '/preview', 0777, true);
@@ -86,5 +87,24 @@ class ConvertPreview extends Command
             return $matches[0];
         }
         return '';
+    }
+
+    // TODO: Create function to get the video data from API
+    public function fetchDataFromExternalAPI()
+    {
+        $apiEndpoint = config('app.get_vod_api_domain') . '/api/get-vod-data';
+
+        try {
+            $response = Http::get($apiEndpoint);
+
+            if ($response->successful()) {
+                $responseData = $response->json();
+                return $responseData;
+            } else {
+                return [];
+            }
+        } catch (\Exception $e) {
+            return [];
+        }
     }
 }

@@ -185,5 +185,7 @@ return [
         // 'Example' => App\Facades\Example::class,
     ])->toArray(),
 
-    'target_domain' => env('TARGET_DOMAIN', 'h5-uat.com'),
+    'store_preview_video_folder' => env('STORE_PREVIEW_VIDEO_FOLDER', 'h5-uat.com'),
+    'get_vod_api_domain' => env('GET_VOD_API_DOMAIN', 'https://h5-uat.com'),
+    'preview_video_domain' => env('PREVIEW_VIDEO_DOMAIN', 'https://asd.uw1wieda.com'),
 ];

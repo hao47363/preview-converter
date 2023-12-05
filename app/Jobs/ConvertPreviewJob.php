@@ -34,14 +34,14 @@ class ConvertPreviewJob implements ShouldQueue
     {
         exec($this->command, $output, $returnValue);
 
-        $file_path = __DIR__ . '/../../../' . config('app.target_domain') . '/preview/' . $this->vodId . '.mp4';
+        $file_path = __DIR__ . '/../../../' . config('app.store_preview_video_folder') . '/preview/' . $this->vodId . '.mp4';
 
         if (file_exists($file_path)) {
             DB::table('mac_vod')
                 ->where('vod_id', $this->vodId)
                 ->update(
                     [
-                        'vod_down_url' => 'https://asd.uw1wieda.com/preview/' . $this->vodId . '.mp4',
+                        'vod_down_url' => config('app.preview_video_domain') . '/preview/' . $this->vodId . '.mp4',
                         'vod_down_note' => 'Done'
                     ]
                 );
