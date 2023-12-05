@@ -34,7 +34,7 @@ class ConvertPreviewJob implements ShouldQueue
     {
         exec($this->command, $output, $returnValue);
 
-        $file_path = __DIR__ . '/../../../h5-uat.com/preview/' . $this->vodId . '.mp4';
+        $file_path = __DIR__ . '/../../../' . config('app.target_domain') . '/preview/' . $this->vodId . '.mp4';
 
         if (file_exists($file_path)) {
             DB::table('mac_vod')

@@ -55,7 +55,7 @@ class ConvertPreview extends Command
                         }
 
                         if (!empty($newMacVodDownloadLink)) {
-                            $newVodIdDirectory = __DIR__ . '/../../../../h5-uat.com/preview/' . $macVod->vod_id;
+                            $newVodIdDirectory = __DIR__ . '/../../../../' . config('app.target_domain') . '/preview/' . $macVod->vod_id;
 
                             if (!file_exists($newVodIdDirectory . '/preview')) {
                                 mkdir($newVodIdDirectory . '/preview', 0777, true);

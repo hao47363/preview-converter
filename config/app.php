@@ -185,4 +185,5 @@ return [
         // 'Example' => App\Facades\Example::class,
     ])->toArray(),
 
+    'target_domain' => env('TARGET_DOMAIN', 'h5-uat.com'),
 ];
