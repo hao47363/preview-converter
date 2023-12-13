@@ -28,15 +28,15 @@ echo "total segment: ${total_segments} and interval: ${interval}"
 # Download and save one second from each interval
 for i in {0..7}
 do
-  selected_index=$((i * interval))
+  selected_index=$(((i+1) * interval))
   segment_url="${segment_urls[$selected_index]}"
   echo "segment_url:${segment_url}"
-  ffmpeg -i "https://${domain}${segment_url}" -t 1 -an -c:v copy "${output_file}/segment_${i}.ts"
-  echo "file '${output_file}/segment_${i}.ts'" >> "${concat_list}"
+  ffmpeg -i "https://${domain}${segment_url}" -t 1 -r 30 -vf scale=426:240 -an -c:v libx264 -preset medium -crf 23 -c:a aac -strict experimental -b:a 128k "${output_file}/segment_${i}.mp4"
+  echo "file '${output_file}/segment_${i}.mp4'" >> "${concat_list}"
 done
 
 # Use the concat demuxer to combine the selected videos
-ffmpeg -f concat -safe 0 -i "${concat_list}" -c:v copy "${output_file}.mp4"
+ffmpeg -f concat -safe 0 -i "${concat_list}" -c:v libx264 -preset medium -crf 23 -c:a aac -strict experimental -b:a 128k "${output_file}.mp4"
 
 # Remove the temporary folder and file
 rm -r "${output_file}"

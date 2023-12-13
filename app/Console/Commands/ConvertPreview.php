@@ -28,13 +28,13 @@ class ConvertPreview extends Command
      */
     public function handle()
     {
-        $macVodData = DB::select('SELECT * FROM mac_vod where vod_down_url = ""');
+        $macVodData = $this->fetchDataFromExternalAPI();
 
         foreach ($macVodData as $macVod) {
-            $macVodDownloadLink = $this->extractString($macVod->vod_play_url);
+            $macVodDownloadLink = $this->extractString($macVod['m3u8']);
             if (!empty($macVodDownloadLink)) {
                 $videoFileName = basename($macVodDownloadLink);
-                $vodIdDirectory = public_path('preview/' . $macVod->vod_id);
+                $vodIdDirectory = public_path('preview/' . $macVod['vodId']);
                 $savePath = $vodIdDirectory . '/' . $videoFileName;
 
                 if (!file_exists($vodIdDirectory)) {
@@ -56,7 +56,7 @@ class ConvertPreview extends Command
                         }
 
                         if (!empty($newMacVodDownloadLink)) {
-                            $newVodIdDirectory = __DIR__ . '/../../../../' . config('app.store_preview_video_folder') . '/preview/' . $macVod->vod_id;
+                            $newVodIdDirectory = __DIR__ . '/../../../../' . config('app.store_preview_video_folder') . '/preview/' . $macVod['vodId'];
 
                             if (!file_exists($newVodIdDirectory . '/preview')) {
                                 mkdir($newVodIdDirectory . '/preview', 0777, true);
@@ -64,15 +64,19 @@ class ConvertPreview extends Command
 
                             $command = './random.sh ' . $newVodIdDirectory . ' ' . $newMacVodDownloadLink;
 
-                            DB::table('mac_vod')
-                                ->where('vod_id', $macVod->vod_id)
-                                ->update(
-                                    [
-                                        'vod_down_note' => 'Converting'
-                                    ],
-                                );
+                            $apiEndpoint = config('app.get_vod_api_domain') . '/api/v1/vod/postPreview';
+                            try {
+                                $response = Http::post($apiEndpoint, [
+                                    'vodId' => $macVod['vodId'],
+                                    'vodPreviewStatus' => 'Converting',
+                                ]);
 
-                            dispatch(new ConvertPreviewJob($command, $macVod->vod_id));
+                                if ($response->successful()) {
+                                    dispatch(new ConvertPreviewJob($command, $macVod['vodId']));
+                                }
+                            } catch (\Exception $e) {
+                                return $e;
+                            }
                         }
                     }
                 }
@@ -92,14 +96,14 @@ class ConvertPreview extends Command
     // TODO: Create function to get the video data from API
     public function fetchDataFromExternalAPI()
     {
-        $apiEndpoint = config('app.get_vod_api_domain') . '/api/get-vod-data';
+        $apiEndpoint = config('app.get_vod_api_domain') . '/api/v1/vod/previewTask';
 
         try {
-            $response = Http::get($apiEndpoint);
+            $response = Http::post($apiEndpoint);
 
             if ($response->successful()) {
                 $responseData = $response->json();
-                return $responseData;
+                return $responseData['data']['data'];
             } else {
                 return [];
             }

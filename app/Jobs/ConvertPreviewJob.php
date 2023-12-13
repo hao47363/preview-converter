@@ -10,6 +10,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Http;
 
 class ConvertPreviewJob implements ShouldQueue
 {
@@ -37,33 +38,26 @@ class ConvertPreviewJob implements ShouldQueue
         $file_path = __DIR__ . '/../../../' . config('app.store_preview_video_folder') . '/preview/' . $this->vodId . '.mp4';
 
         if (file_exists($file_path)) {
-            DB::table('mac_vod')
-                ->where('vod_id', $this->vodId)
-                ->update(
-                    [
-                        'vod_down_url' => config('app.preview_video_domain') . '/preview/' . $this->vodId . '.mp4',
-                        'vod_down_note' => 'Done'
-                    ]
-                );
+            $apiEndpoint = config('app.get_vod_api_domain') . '/api/v1/vod/postPreview';
+            try {
+                $response = Http::post($apiEndpoint, [
+                    'vodId' => $this->vodId,
+                    'vodPreviewUrl' => config('app.preview_video_domain') . '/preview/' . $this->vodId . '.mp4',
+                    'vodPreviewStatus' => 'Done',
+                ]);
+            } catch (\Exception $e) {
+                throw $e;
+            }
         } else {
-            DB::table('mac_vod')
-                ->where('vod_id', $this->vodId)
-                ->update(
-                    [
-                        'vod_down_note' => 'Failed'
-                    ]
-                );
-
-            // DB::table('mac_vod')
-            //     ->where('vod_id', $this->vodId)
-            //     ->update(
-            //         [
-            //             'vod_down_url' => 'https://asd.uw1wieda.com/preview/' . $this->vodId . '.mp4',
-            //             'vod_down_note' => 'Converting'
-            //         ],
-            //     );
-
-            // dispatch(new ConvertPreviewJob($this->command, $this->vodId));
+            $apiEndpoint = config('app.get_vod_api_domain') . '/api/v1/vod/postPreview';
+            try {
+                $response = Http::post($apiEndpoint, [
+                    'vodId' => $this->vodId,
+                    'vodPreviewStatus' => 'Failed',
+                ]);
+            } catch (\Exception $e) {
+                throw $e;
+            }
         }
 
         $folderPath = public_path('preview/' . $this->vodId);
