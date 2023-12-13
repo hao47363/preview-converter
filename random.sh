@@ -1,13 +1,14 @@
 #!/bin/bash
 
-if [ "$#" -ne 2 ]; then
-    echo "Usage: $0 <output_file_name> <M3U8_URL>"
+if [ "$#" -ne 3 ]; then
+    echo "Usage: $0 <output_file_name> <M3U8_URL> <VOD_ID>"
     exit 1
 fi
 
 output_file="$1"
 m3u8_url="$2"
-concat_list="concat_list.txt"
+vod_id="$3"
+concat_list="concat_list_${vod_id}.txt"
 
 # Create a temporary folder to store the selected video segments
 mkdir -p "${output_file}"

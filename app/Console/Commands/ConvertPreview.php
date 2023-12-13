@@ -62,7 +62,7 @@ class ConvertPreview extends Command
                                 mkdir($newVodIdDirectory . '/preview', 0777, true);
                             }
 
-                            $command = './random.sh ' . $newVodIdDirectory . ' ' . $newMacVodDownloadLink;
+                            $command = './random.sh ' . $newVodIdDirectory . ' ' . $newMacVodDownloadLink . ' ' . $macVod['vodId'];
 
                             $apiEndpoint = config('app.get_vod_api_domain') . '/api/v1/vod/postPreview';
                             try {
